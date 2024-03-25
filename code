@@ -1,0 +1,81 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+import re
+import string
+
+df_fake = pd.read_csv("D:/Nam 3/APACHE/Fake News Detection/Fake.csv")
+df_true = pd.read_csv("D:/Nam 3/APACHE/Fake News Detection/True.csv")
+
+df_fake["class"] = 0
+df_true["class"] = 1
+
+df_fake.shape, df_true.shape
+
+# Removing last 10 rows for manual testing
+df_fake_manual_testing = df_fake.tail(10)
+for i in range(23480,23470,-1):
+    df_fake.drop([i], axis = 0, inplace = True)
+    
+    
+df_true_manual_testing = df_true.tail(10)
+for i in range(21416,21406,-1):
+    df_true.drop([i], axis = 0, inplace = True)
+
+# check lại
+df_fake.shape, df_true.shape
+
+df_fake_manual_testing["class"] = 0
+df_true_manual_testing["class"] = 1
+
+# test 10 dòng fake 
+df_fake_manual_testing.head(10)
+# test 10 dòng true
+df_true_manual_testing.head(10)
+
+df_manual_testing = pd.concat([df_fake_manual_testing,df_true_manual_testing], axis = 0)
+df_manual_testing.to_csv("manual_testing.csv")
+
+df_merge = pd.concat([df_fake, df_true], axis =0 )
+df_merge.head(10)
+
+# check dạng 
+df_merge.columns
+
+# xóa cột không cần thiết
+df = df_merge.drop(["title", "subject","date"], axis = 1)
+# check ô bị trống
+df.isnull().sum()
+# xáo trộn ngẫu nhiên dữ liệu
+df = df.sample(frac = 1)
+
+df.reset_index(inplace = True)
+df.drop(["index"], axis = 1, inplace = True)
+
+df.columns
+
+df.head()
+
+# xử lý làm sạch văn bản
+def wordopt(text):
+    text = text.lower()
+    text = re.sub('\[.*?\]', '', text)
+    text = re.sub("\\W"," ",text) 
+    text = re.sub('https?://\S+|www\.\S+', '', text)
+    text = re.sub('<.*?>+', '', text)
+    text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
+    text = re.sub('\n', '', text)
+    text = re.sub('\w*\d\w*', '', text)    
+    return text
+df["text"] = df["text"].apply(wordopt)
+
+#xác định biến phụ thuộc và biến độc lập
+x = df["text"]
+y = df["class"]
+
+# tách và đào tạo( 75% trong tập huấn luyện và 25% thử nghiệm)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
