@@ -17,7 +17,7 @@ df_true["class"] = 1
 df_fake.shape, df_true.shape
 
 =======
-# Dùng 10 dòng cuối để thử nghiệm riêng. tạo df riêng để test
+# Dùng 10 dòng cuối để xem xét dữ liệu
 
 df_fake_manual_testing = df_fake.tail(10)
 for i in range(23480,23470,-1):
